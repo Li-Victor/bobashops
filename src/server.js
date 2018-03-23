@@ -14,15 +14,18 @@ app.prepare().then(() => {
 
   server.get('/shops', (req, res) => {
     const { lat, long } = req.query;
-    fetch(`https://api.yelp.com/v3/businesses/search?term=boba&latitude=${lat}&longitude=${long}`, {
-      headers: {
-        Authorization: `Bearer ${process.env.YELP_API_KEY}`
+    fetch(
+      `https://api.yelp.com/v3/businesses/search?term=boba&latitude=${lat}&longitude=${long}&open_now=true`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.YELP_API_KEY}`
+        }
       }
-    })
+    )
       .then(response => response.json())
       .then(response => {
         console.log(response);
-        return res.send(response);
+        return res.send(response.businesses);
       })
       .catch(err => console.log(err));
   });

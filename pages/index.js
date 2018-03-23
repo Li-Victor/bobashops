@@ -8,7 +8,7 @@ import List from '../components/List';
 type State = {
   loading: boolean,
   locationError: boolean,
-  stores: Array<string>,
+  stores: Array<BobaShops>,
   navigationError: boolean
 };
 
@@ -16,7 +16,7 @@ class HomePage extends React.Component<{}, State> {
   state = {
     loading: false,
     locationError: false,
-    navigationError: !('geolocation' in navigator),
+    navigationError: false,
     stores: []
   };
 
@@ -46,9 +46,9 @@ class HomePage extends React.Component<{}, State> {
       const { latitude, longitude } = position.coords;
       const response = await fetch(`/shops?lat=${latitude}&long=${longitude}`);
       const stores = await response.json();
-      console.log(stores);
       this.setState({
-        loading: false
+        loading: false,
+        stores
       });
     } catch (error) {
       this.setState({
@@ -71,7 +71,7 @@ class HomePage extends React.Component<{}, State> {
 
         {locationError && <h1>Unable to retrieve your location.</h1>}
         {loading ? (
-          <h1>Finding Stores...</h1>
+          <h1>Finding Open Boba Stores...</h1>
         ) : (
           <div>
             <button onClick={this.buttonClick}>{locationError ? 'Retry' : 'Find Boba'}</button>

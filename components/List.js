@@ -3,8 +3,10 @@
 import * as React from 'react';
 
 type Props = {
-  stores: Array<string>
+  stores: Array<BobaShops>
 };
 
-const List = ({ stores }: Props) => <h1>List</h1>;
+const List = ({ stores }: Props) => (
+  <ul>{stores.map(store => <li key={store.id}>{store.name}</li>)}</ul>
+);
 export default List;
