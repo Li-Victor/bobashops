@@ -8,52 +8,63 @@ import List from '../components/List';
 type State = {
   loading: boolean,
   locationError: boolean,
-  stores: Array<string>
+  stores: Array<string>,
+  navigationError: boolean
 };
 
 class HomePage extends React.Component<{}, State> {
   state = {
     loading: false,
     locationError: false,
+    navigationError: !('geolocation' in navigator),
     stores: []
   };
 
-  buttonClick = () => {
+  getCurrentPosition = (options: {
+    enableHighAccuracy: boolean,
+    timeout: number,
+    maximumAge: number
+  }) =>
+    // $FlowFixMe
+    new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject, options);
+    });
+
+  buttonClick = async () => {
     this.setState({
       locationError: false,
       loading: true
     });
 
-    navigator.geolocation.getCurrentPosition(
-      position => {
-        const { latitude, longitude } = position.coords;
-        console.log(latitude);
-        console.log(longitude);
-        fetch(`/shops?lat=${latitude}&long=${longitude}`)
-          .then(response => response.json())
-          .then(response => {
-            console.log(response);
-            this.setState({
-              loading: false
-            });
-          });
-      },
-      () => {
-        this.setState({
-          locationError: true,
-          loading: false
-        });
-      },
-      {
+    try {
+      const position = await this.getCurrentPosition({
         enableHighAccuracy: false,
         timeout: 60000,
         maximumAge: 10000
-      }
-    );
+      });
+
+      const { latitude, longitude } = position.coords;
+      const response = await fetch(`/shops?lat=${latitude}&long=${longitude}`);
+      const stores = await response.json();
+      console.log(stores);
+      this.setState({
+        loading: false
+      });
+    } catch (error) {
+      this.setState({
+        locationError: true,
+        loading: false
+      });
+    }
   };
 
   render() {
-    const { loading, locationError, stores } = this.state;
+    const { loading, locationError, stores, navigationError } = this.state;
+
+    if (navigationError) {
+      return <h1>Geolocation is not supported by your browser.</h1>;
+    }
+
     return (
       <div>
         <Header name="Bobashops" />
