@@ -29,8 +29,7 @@ class HomePage extends React.Component<{}, State> {
         const { latitude, longitude } = position.coords;
         console.log(latitude);
         console.log(longitude);
-        const port = process.env.PORT || 3000;
-        fetch(`http://localhost:${port}/shops?lat=${latitude}&long=${longitude}`)
+        fetch(`/shops?lat=${latitude}&long=${longitude}`)
           .then(response => response.json())
           .then(response => {
             console.log(response);
