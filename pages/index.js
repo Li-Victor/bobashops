@@ -1,48 +1,73 @@
 // @flow
 
 import * as React from 'react';
+import fetch from 'isomorphic-fetch';
 import Header from '../components/Header';
 import List from '../components/List';
-import Search from '../components/Search';
 
 type State = {
-  searchTerm: string,
-  loading: boolean
+  loading: boolean,
+  locationError: boolean,
+  stores: Array<string>
 };
 
 class HomePage extends React.Component<{}, State> {
   state = {
-    searchTerm: '',
-    loading: false
+    loading: false,
+    locationError: false,
+    stores: []
   };
 
-  handleChange = (event: SyntheticInputEvent<HTMLInputElement>) => {
+  buttonClick = () => {
     this.setState({
-      searchTerm: event.currentTarget.value
-    });
-  };
-
-  handleSubmit = (event: SyntheticEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    this.setState({
+      locationError: false,
       loading: true
     });
 
-    // search request
-    setTimeout(() => {
-      this.setState({
-        loading: false
-      });
-    }, 1000);
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        const { latitude, longitude } = position.coords;
+        console.log(latitude);
+        console.log(longitude);
+        const port = process.env.PORT || 3000;
+        fetch(`http://localhost:${port}/shops?lat=${latitude}&long=${longitude}`)
+          .then(response => response.json())
+          .then(response => {
+            console.log(response);
+            this.setState({
+              loading: false
+            });
+          });
+      },
+      () => {
+        this.setState({
+          locationError: true,
+          loading: false
+        });
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 60000,
+        maximumAge: 10000
+      }
+    );
   };
 
   render() {
-    const { searchTerm, loading } = this.state;
+    const { loading, locationError, stores } = this.state;
     return (
       <div>
         <Header name="Bobashops" />
-        <Search searchTerm={searchTerm} onChange={this.handleChange} onSubmit={this.handleSubmit} />
-        <List loading={loading} searchTerm={searchTerm} />
+
+        {locationError && <h1>Unable to retrieve your location.</h1>}
+        {loading ? (
+          <h1>Finding Stores...</h1>
+        ) : (
+          <div>
+            <button onClick={this.buttonClick}>{locationError ? 'Retry' : 'Find Boba'}</button>
+            {stores.length !== 0 && <List stores={stores} />}
+          </div>
+        )}
       </div>
     );
   }
