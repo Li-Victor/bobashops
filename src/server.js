@@ -87,6 +87,29 @@ async function setup() {
     return res.send(response.businesses);
   });
 
+  // initial data, need to get all shop and user info
+  server.get('/init', async (req, res) => {
+    const allShops = await dbConnection.countByShops();
+    if (req.query.id) {
+      let userShops = await dbConnection.log.find({ userid: req.query.id });
+      userShops = userShops.map(userShop => userShop.bobaid);
+      return res.json({ userShops, allShops, id: req.query.id });
+    }
+    return res.json({ allShops });
+  });
+
+  // user goes to boba shop, needs shop id as well as user id
+  // returns updated shop and user info
+  server.post('/gotoshop', async (req, res) => {
+    if (!req.user) return res.end();
+  });
+
+  // user cancels going to boba shop, needs shop id as well as user id
+  // returns updated shop and user info
+  server.delete('/cancel', async (req, res) => {
+    if (!req.user) return res.end();
+  });
+
   server.get('*', (req, res) => handler(req, res));
 
   server.listen(port, err => {

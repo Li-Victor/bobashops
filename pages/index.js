@@ -5,19 +5,47 @@ import fetch from 'isomorphic-fetch';
 import Header from '../components/Header';
 import List from '../components/List';
 
+type Props = {
+  userShops: Array<string>,
+  allShops: Array<ShopInfo>,
+  id: number
+};
+
 type State = {
   loading: boolean,
   locationError: boolean,
-  stores: Array<BobaShops>,
-  navigationError: boolean
+  nearByStores: Array<BobaShops>,
+  navigationError: boolean,
+  userShops: Array<string>,
+  allShops: Array<ShopInfo>
 };
 
-class HomePage extends React.Component<{}, State> {
+class HomePage extends React.Component<Props, State> {
+  static async getInitialProps({ req }: any) {
+    let response;
+    if (req.user) {
+      response = await fetch(`http://127.0.0.1:3000/init?id=${req.user.id}`);
+      response = await response.json();
+    } else {
+      response = await fetch('http://127.0.0.1:3000/init');
+      response = await response.json();
+    }
+    return response;
+  }
+
+  static defaultProps = {
+    userShops: [],
+    allShops: [],
+    id: 0
+  };
+
   state = {
     loading: false,
     locationError: false,
     navigationError: false,
-    stores: []
+    nearByStores: [],
+    userShops: this.props.userShops,
+    allShops: this.props.allShops
   };
 
   getCurrentPosition = (options: {
@@ -30,7 +58,7 @@ class HomePage extends React.Component<{}, State> {
       navigator.geolocation.getCurrentPosition(resolve, reject, options);
     });
 
-  buttonClick = async () => {
+  findBoba = async () => {
     this.setState({
       locationError: false,
       loading: true
@@ -45,10 +73,10 @@ class HomePage extends React.Component<{}, State> {
 
       const { latitude, longitude } = position.coords;
       const response = await fetch(`/shops?lat=${latitude}&long=${longitude}`);
-      const stores = await response.json();
+      const nearByStores = await response.json();
       this.setState({
         loading: false,
-        stores
+        nearByStores
       });
     } catch (error) {
       this.setState({
@@ -59,7 +87,8 @@ class HomePage extends React.Component<{}, State> {
   };
 
   render() {
-    const { loading, locationError, stores, navigationError } = this.state;
+    const { loading, locationError, nearByStores, navigationError } = this.state;
+    const { userShops, allShops, id } = this.props;
 
     if (navigationError) {
       return <h1>Geolocation is not supported by your browser.</h1>;
@@ -74,8 +103,10 @@ class HomePage extends React.Component<{}, State> {
           <h1>Finding Open Boba Stores...</h1>
         ) : (
           <div>
-            <button onClick={this.buttonClick}>{locationError ? 'Retry' : 'Find Boba'}</button>
-            {stores.length !== 0 && <List stores={stores} />}
+            <button onClick={this.findBoba}>{locationError ? 'Retry' : 'Find Boba'}</button>
+            {nearByStores.length !== 0 && (
+              <List nearByStores={nearByStores} userShops={userShops} allShops={allShops} />
+            )}
           </div>
         )}
       </div>
