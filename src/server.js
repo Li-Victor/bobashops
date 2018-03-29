@@ -101,13 +101,18 @@ async function setup() {
   // user goes to boba shop, needs shop id as well as user id
   // returns updated shop and user info
   server.post('/gotoshop', async (req, res) => {
-    if (!req.user) return res.end();
+    const { userid, storeid } = req.query;
+    console.log(userid, storeid);
+    return res.send({});
   });
 
   // user cancels going to boba shop, needs shop id as well as user id
   // returns updated shop and user info
   server.delete('/cancel', async (req, res) => {
+    console.log('here');
     if (!req.user) return res.end();
+    console.log(res.user);
+    return res.send(res.user);
   });
 
   server.get('*', (req, res) => handler(req, res));

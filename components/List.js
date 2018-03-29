@@ -3,31 +3,36 @@
 import * as React from 'react';
 
 type Props = {
-  nearByStores: Array<BobaShops>,
+  nearbyStores: Array<BobaShops>,
   userShops: Array<string>,
-  allShops: Array<ShopInfo>
+  allShops: Array<ShopInfo>,
+  buttonClick: Function
 };
 
-const List = ({ nearByStores, userShops, allShops }: Props) => {
+const List = ({ nearbyStores, userShops, allShops, buttonClick }: Props) => {
   const shopMap = new Map();
   allShops.forEach(shopInfo => shopMap.set(shopInfo.bobaid, shopInfo.count));
 
   return (
     <ul>
-      {nearByStores.map(store => (
-        <li key={store.id}>
-          {store.name}
-          {userShops.indexOf(store.id) >= 0 && (
-            <span style={{ color: 'red' }}> User is going here!</span>
-          )}
-
-          {shopMap.has(store.id) ? (
-            <span style={{ color: 'green' }}> {shopMap.get(store.id)} Going.</span>
-          ) : (
-            <span style={{ color: 'blue' }}> 0 Going.</span>
-          )}
-        </li>
-      ))}
+      {nearbyStores.map(store => {
+        const isGoing = userShops.indexOf(store.id) >= 0;
+        return (
+          <li key={store.id}>
+            {store.name}
+            <button
+              style={
+                isGoing
+                  ? { color: 'red', backgroundColor: 'lightgreen' }
+                  : { color: 'buttontext', backgroundColor: 'buttonface' }
+              }
+              onClick={() => buttonClick(isGoing, store.id)}
+            >
+              {shopMap.has(store.id) ? `${shopMap.get(store.id)} Going.` : '0 Going.'}
+            </button>
+          </li>
+        );
+      })}
     </ul>
   );
 };

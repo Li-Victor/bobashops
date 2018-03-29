@@ -14,11 +14,13 @@ type Props = {
 type State = {
   loading: boolean,
   locationError: boolean,
-  nearByStores: Array<BobaShops>,
+  nearbyStores: Array<BobaShops>,
   navigationError: boolean,
   userShops: Array<string>,
   allShops: Array<ShopInfo>
 };
+
+const notLoggedInID = -1;
 
 class HomePage extends React.Component<Props, State> {
   static async getInitialProps({ req }: any) {
@@ -36,17 +38,25 @@ class HomePage extends React.Component<Props, State> {
   static defaultProps = {
     userShops: [],
     allShops: [],
-    id: 0
+    id: notLoggedInID
   };
 
   state = {
     loading: false,
     locationError: false,
     navigationError: false,
-    nearByStores: [],
+    nearbyStores: [],
     userShops: this.props.userShops,
     allShops: this.props.allShops
   };
+
+  componentDidMount() {
+    const stores = JSON.parse(window.localStorage.getItem('nearby'));
+    window.localStorage.removeItem('nearby');
+    this.setState({
+      nearbyStores: stores || []
+    });
+  }
 
   getCurrentPosition = (options: {
     enableHighAccuracy: boolean,
@@ -73,10 +83,10 @@ class HomePage extends React.Component<Props, State> {
 
       const { latitude, longitude } = position.coords;
       const response = await fetch(`/shops?lat=${latitude}&long=${longitude}`);
-      const nearByStores = await response.json();
+      const nearbyStores = await response.json();
       this.setState({
         loading: false,
-        nearByStores
+        nearbyStores
       });
     } catch (error) {
       this.setState({
@@ -86,9 +96,37 @@ class HomePage extends React.Component<Props, State> {
     }
   };
 
+  buttonClick = async (isGoing: boolean, storeId: string) => {
+    if (this.props.id === notLoggedInID) {
+      window.localStorage.setItem('nearby', JSON.stringify(this.state.nearbyStores));
+      window.location = '/login/twitter';
+      return;
+    }
+
+    if (isGoing) {
+      let response = await fetch(`/cancel?storeid=${storeId}&userid=${this.props.id}`, {
+        method: 'DELETE'
+      });
+      response = await response.json();
+      console.log(response);
+    } else {
+      let response = await fetch(`/gotoshop?storeid=${storeId}&userid=${this.props.id}`, {
+        method: 'POST'
+      });
+      response = await response.json();
+      console.log(response);
+    }
+  };
+
   render() {
-    const { loading, locationError, nearByStores, navigationError } = this.state;
-    const { userShops, allShops, id } = this.props;
+    const {
+      loading,
+      locationError,
+      nearbyStores,
+      navigationError,
+      userShops,
+      allShops
+    } = this.state;
 
     if (navigationError) {
       return <h1>Geolocation is not supported by your browser.</h1>;
@@ -100,12 +138,17 @@ class HomePage extends React.Component<Props, State> {
 
         {locationError && <h1>Unable to retrieve your location.</h1>}
         {loading ? (
-          <h1>Finding Open Boba Stores...</h1>
+          <h1>Finding Nearby Open Boba Stores...</h1>
         ) : (
           <div>
             <button onClick={this.findBoba}>{locationError ? 'Retry' : 'Find Boba'}</button>
-            {nearByStores.length !== 0 && (
-              <List nearByStores={nearByStores} userShops={userShops} allShops={allShops} />
+            {nearbyStores.length !== 0 && (
+              <List
+                nearbyStores={nearbyStores}
+                userShops={userShops}
+                allShops={allShops}
+                buttonClick={this.buttonClick}
+              />
             )}
           </div>
         )}
