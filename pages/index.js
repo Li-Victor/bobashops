@@ -56,7 +56,8 @@ class HomePage extends React.Component<Props, State> {
     window.localStorage.removeItem('nearby');
     if (stores) {
       this.setState({
-        nearbyStores: stores
+        nearbyStores: stores,
+        locationError: !('geolocation' in window.navigator)
       });
     }
   }
@@ -140,6 +141,17 @@ class HomePage extends React.Component<Props, State> {
       return <h1>Geolocation is not supported by your browser.</h1>;
     }
 
+    let buttonMessage;
+    if (locationError) {
+      buttonMessage = <button onClick={this.findBoba}>Retry</button>;
+    } else {
+      buttonMessage = (
+        <button onClick={this.findBoba}>
+          {nearbyStores.length !== 0 ? 'Refresh Location' : 'Find Boba'}
+        </button>
+      );
+    }
+
     return (
       <div>
         <Header name="Bobashops" />
@@ -149,7 +161,7 @@ class HomePage extends React.Component<Props, State> {
           <h1>Finding Nearby Open Boba Stores...</h1>
         ) : (
           <div>
-            <button onClick={this.findBoba}>{locationError ? 'Retry' : 'Find Boba'}</button>
+            {buttonMessage}
             {nearbyStores.length !== 0 && (
               <List
                 nearbyStores={nearbyStores}
