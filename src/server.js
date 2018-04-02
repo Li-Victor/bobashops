@@ -7,10 +7,10 @@ import { Strategy } from 'passport-twitter';
 import connectPgSimple from 'connect-pg-simple';
 import session from 'express-session';
 
-const port = parseInt(process.env.PORT, 10) || 3000;
 const dev = process.env.NODE_ENV !== 'production';
 const app = next({ dev });
 const handler = app.getRequestHandler();
+const port = parseInt(process.env.PORT, 10) || 3000;
 
 async function setup() {
   const dbConnection = await massive(process.env.DATABASE_URL);
@@ -46,7 +46,7 @@ async function setup() {
       {
         consumerKey: process.env.TWITTER_CONSUMER_KEY,
         consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
-        callbackURL: `${process.env.REDIRECT_DOMAIN}/login/twitter/return`
+        callbackURL: `${process.env.DOMAIN}/login/twitter/return`
       },
       async (accessToken, refreshToken, profile, cb) => {
         const { id, displayName } = profile;

@@ -25,11 +25,12 @@ const notLoggedInID = -1;
 class HomePage extends React.Component<Props, State> {
   static async getInitialProps({ req }: any) {
     let response;
+    const domain = process.env.DOMAIN || '127.0.0.1:3000';
     if (req.user) {
-      response = await fetch(`http://127.0.0.1:3000/init?id=${req.user.id}`);
+      response = await fetch(`${domain}/init?id=${req.user.id}`);
       response = await response.json();
     } else {
-      response = await fetch('http://127.0.0.1:3000/init');
+      response = await fetch(`${domain}/init`);
       response = await response.json();
     }
     return response;
