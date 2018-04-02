@@ -1,6 +1,6 @@
 // @flow
 
 declare type ShopInfo = {
-  bobaid: string,
+  storeid: string,
   count: string
 };

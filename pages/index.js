@@ -54,9 +54,11 @@ class HomePage extends React.Component<Props, State> {
   componentDidMount() {
     const stores = JSON.parse(window.localStorage.getItem('nearby'));
     window.localStorage.removeItem('nearby');
-    this.setState({
-      nearbyStores: stores || []
-    });
+    if (stores) {
+      this.setState({
+        nearbyStores: stores
+      });
+    }
   }
 
   getCurrentPosition = (options: {
@@ -104,19 +106,24 @@ class HomePage extends React.Component<Props, State> {
       return;
     }
 
+    let response;
+
     if (isGoing) {
-      let response = await fetch(`/cancel?storeid=${storeId}&userid=${this.props.id}`, {
+      response = await fetch(`/cancel?storeid=${storeId}&userid=${this.props.id}`, {
         method: 'DELETE'
       });
-      response = await response.json();
-      console.log(response);
     } else {
-      let response = await fetch(`/gotoshop?storeid=${storeId}&userid=${this.props.id}`, {
+      response = await fetch(`/gotoshop?storeid=${storeId}&userid=${this.props.id}`, {
         method: 'POST'
       });
-      response = await response.json();
-      console.log(response);
     }
+
+    response = await response.json();
+    const { userShops, allShops } = response;
+    this.setState({
+      userShops,
+      allShops
+    });
   };
 
   render() {

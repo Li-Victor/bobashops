@@ -12,6 +12,12 @@ const app = next({ dev });
 const handler = app.getRequestHandler();
 const port = parseInt(process.env.PORT, 10) || 3000;
 
+async function findShopsWithUser(dbConnection, userid) {
+  let shops = await dbConnection.log.find({ userid });
+  shops = shops.map(userShop => userShop.storeid);
+  return shops;
+}
+
 async function setup() {
   const dbConnection = await massive(process.env.DATABASE_URL);
   await app.prepare();
@@ -83,7 +89,6 @@ async function setup() {
       }
     );
     response = await response.json();
-    console.log(response);
     return res.send(response.businesses);
   });
 
@@ -91,8 +96,7 @@ async function setup() {
   server.get('/init', async (req, res) => {
     const allShops = await dbConnection.countByShops();
     if (req.query.id) {
-      let userShops = await dbConnection.log.find({ userid: req.query.id });
-      userShops = userShops.map(userShop => userShop.bobaid);
+      const userShops = await findShopsWithUser(dbConnection, req.query.id);
       return res.json({ userShops, allShops, id: req.query.id });
     }
     return res.json({ allShops });
@@ -102,17 +106,20 @@ async function setup() {
   // returns updated shop and user info
   server.post('/gotoshop', async (req, res) => {
     const { userid, storeid } = req.query;
-    console.log(userid, storeid);
-    return res.send({});
+    await dbConnection.log.insert({ userid, storeid });
+    const allShops = await dbConnection.countByShops();
+    const userShops = await findShopsWithUser(dbConnection, userid);
+    return res.json({ userShops, allShops });
   });
 
   // user cancels going to boba shop, needs shop id as well as user id
   // returns updated shop and user info
   server.delete('/cancel', async (req, res) => {
-    console.log('here');
-    if (!req.user) return res.end();
-    console.log(res.user);
-    return res.send(res.user);
+    const { userid, storeid } = req.query;
+    await dbConnection.log.destroy({ userid, storeid });
+    const allShops = await dbConnection.countByShops();
+    const userShops = await findShopsWithUser(dbConnection, userid);
+    return res.json({ userShops, allShops });
   });
 
   server.get('*', (req, res) => handler(req, res));

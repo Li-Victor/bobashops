@@ -1,3 +1,3 @@
-SELECT COUNT(*) AS COUNT, bobaid
+SELECT COUNT(*) AS COUNT, storeid
 FROM log
-GROUP BY log.bobaid;
+GROUP BY log.storeid;

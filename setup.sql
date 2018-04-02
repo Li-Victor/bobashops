@@ -6,7 +6,7 @@ CREATE TABLE users (
 CREATE TABLE log (
   logid SERIAL NOT NULL PRIMARY KEY,
   userid BIGSERIAL NOT NULL,
-  bobaid TEXT NOT NULL,
+  storeid TEXT NOT NULL,
   FOREIGN KEY (userid) REFERENCES users(id) ON DELETE CASCADE
 );
 

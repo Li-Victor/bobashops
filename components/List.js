@@ -11,7 +11,7 @@ type Props = {
 
 const List = ({ nearbyStores, userShops, allShops, buttonClick }: Props) => {
   const shopMap = new Map();
-  allShops.forEach(shopInfo => shopMap.set(shopInfo.bobaid, shopInfo.count));
+  allShops.forEach(shopInfo => shopMap.set(shopInfo.storeid, shopInfo.count));
 
   return (
     <ul>
