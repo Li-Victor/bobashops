@@ -20,22 +20,20 @@ type State = {
   allShops: Array<ShopInfo>
 };
 
-const notLoggedInID = -1;
-
 class HomePage extends React.Component<Props, State> {
-  static defaultProps = {
-    userShops: [],
-    allShops: [],
-    id: notLoggedInID
-  };
-
   state = {
     loading: false,
     locationError: false,
     navigationError: false,
     nearbyStores: [],
-    userShops: this.props.userShops,
-    allShops: this.props.allShops
+    userShops: (() => {
+      const { userShops } = this.props;
+      return userShops || [];
+    })(),
+    allShops: (() => {
+      const { allShops } = this.props;
+      return allShops || [];
+    })()
   };
 
   componentDidMount() {
@@ -99,8 +97,10 @@ class HomePage extends React.Component<Props, State> {
   };
 
   buttonClick = async (isGoing: boolean, storeId: string) => {
-    if (this.props.id === notLoggedInID) {
-      window.localStorage.setItem('nearby', JSON.stringify(this.state.nearbyStores));
+    const { id } = this.props;
+    const { nearbyStores } = this.state;
+    if (!id) {
+      window.localStorage.setItem('nearby', JSON.stringify(nearbyStores));
       window.location = '/login/twitter';
       return;
     }
@@ -108,11 +108,11 @@ class HomePage extends React.Component<Props, State> {
     let response;
 
     if (isGoing) {
-      response = await fetch(`/cancel?storeid=${storeId}&userid=${this.props.id}`, {
+      response = await fetch(`/cancel?storeid=${storeId}&userid=${id}`, {
         method: 'DELETE'
       });
     } else {
-      response = await fetch(`/gotoshop?storeid=${storeId}&userid=${this.props.id}`, {
+      response = await fetch(`/gotoshop?storeid=${storeId}&userid=${id}`, {
         method: 'POST'
       });
     }
@@ -146,13 +146,13 @@ Geolocation is not supported by your browser.
     let buttonMessage;
     if (locationError) {
       buttonMessage = (
-        <button onClick={this.findBoba}>
-Retry
+        <button type="button" onClick={this.findBoba}>
+          Retry
         </button>
       );
     } else {
       buttonMessage = (
-        <button onClick={this.findBoba}>
+        <button type="button" onClick={this.findBoba}>
           {nearbyStores.length !== 0 ? 'Refresh Location' : 'Find Boba'}
         </button>
       );

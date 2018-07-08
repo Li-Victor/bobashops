@@ -9,7 +9,9 @@ type Props = {
   buttonClick: Function
 };
 
-const List = ({ nearbyStores, userShops, allShops, buttonClick }: Props) => {
+const List = ({
+  nearbyStores, userShops, allShops, buttonClick
+}: Props) => {
   const shopMap = new Map();
   allShops.forEach(shopInfo => shopMap.set(shopInfo.storeid, shopInfo.count));
 
@@ -21,6 +23,7 @@ const List = ({ nearbyStores, userShops, allShops, buttonClick }: Props) => {
           <li key={store.id}>
             {store.name}
             <button
+              type="button"
               style={
                 isGoing
                   ? { color: 'red', backgroundColor: 'lightgreen' }
@@ -28,9 +31,7 @@ const List = ({ nearbyStores, userShops, allShops, buttonClick }: Props) => {
               }
               onClick={() => buttonClick(isGoing, store.id)}
             >
-              {shopMap.has(store.id)
-                ? `${shopMap.get(store.id)} Going.`
-                : '0 Going.'}
+              {`${shopMap.get(store.id) || 0} Going.`}
             </button>
           </li>
         );
