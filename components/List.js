@@ -28,7 +28,9 @@ const List = ({ nearbyStores, userShops, allShops, buttonClick }: Props) => {
               }
               onClick={() => buttonClick(isGoing, store.id)}
             >
-              {shopMap.has(store.id) ? `${shopMap.get(store.id)} Going.` : '0 Going.'}
+              {shopMap.has(store.id)
+                ? `${shopMap.get(store.id)} Going.`
+                : '0 Going.'}
             </button>
           </li>
         );

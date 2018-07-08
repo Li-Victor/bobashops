@@ -59,7 +59,10 @@ async function setup() {
         const user = await dbConnection.users.findOne({ id });
         if (user) cb(null, user);
         else {
-          const newUser = await dbConnection.users.insert({ id, displayname: displayName });
+          const newUser = await dbConnection.users.insert({
+            id,
+            displayname: displayName
+          });
           if (newUser) cb(null, newUser);
           else cb(new Error('Something has gone wrong with Twitter Auth'));
         }

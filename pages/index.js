@@ -23,19 +23,6 @@ type State = {
 const notLoggedInID = -1;
 
 class HomePage extends React.Component<Props, State> {
-  static async getInitialProps({ req }: any) {
-    let response;
-    const domain = process.env.DOMAIN || '127.0.0.1:3000';
-    if (req.user) {
-      response = await fetch(`${domain}/init?id=${req.user.id}`);
-      response = await response.json();
-    } else {
-      response = await fetch(`${domain}/init`);
-      response = await response.json();
-    }
-    return response;
-  }
-
   static defaultProps = {
     userShops: [],
     allShops: [],
@@ -62,15 +49,26 @@ class HomePage extends React.Component<Props, State> {
     }
   }
 
+  static async getInitialProps({ req }: any) {
+    let response;
+    const domain = process.env.DOMAIN || '127.0.0.1:3000';
+    if (req.user) {
+      response = await fetch(`${domain}/init?id=${req.user.id}`);
+      response = await response.json();
+    } else {
+      response = await fetch(`${domain}/init`);
+      response = await response.json();
+    }
+    return response;
+  }
+
   getCurrentPosition = (options: {
     enableHighAccuracy: boolean,
     timeout: number,
     maximumAge: number
-  }) =>
-    // $FlowFixMe
-    new Promise((resolve, reject) => {
-      navigator.geolocation.getCurrentPosition(resolve, reject, options);
-    });
+  }) => new Promise((resolve, reject) => {
+    navigator.geolocation.getCurrentPosition(resolve, reject, options);
+  });
 
   findBoba = async () => {
     this.setState({
@@ -138,12 +136,20 @@ class HomePage extends React.Component<Props, State> {
     } = this.state;
 
     if (navigationError) {
-      return <h1>Geolocation is not supported by your browser.</h1>;
+      return (
+        <h1>
+Geolocation is not supported by your browser.
+        </h1>
+      );
     }
 
     let buttonMessage;
     if (locationError) {
-      buttonMessage = <button onClick={this.findBoba}>Retry</button>;
+      buttonMessage = (
+        <button onClick={this.findBoba}>
+Retry
+        </button>
+      );
     } else {
       buttonMessage = (
         <button onClick={this.findBoba}>
@@ -156,9 +162,15 @@ class HomePage extends React.Component<Props, State> {
       <div>
         <Header name="Bobashops" />
 
-        {locationError && <h1>Unable to retrieve your location.</h1>}
+        {locationError && (
+        <h1>
+Unable to retrieve your location.
+        </h1>
+        )}
         {loading ? (
-          <h1>Finding Nearby Open Boba Stores...</h1>
+          <h1>
+Finding Nearby Open Boba Stores...
+          </h1>
         ) : (
           <div>
             {buttonMessage}
