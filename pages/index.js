@@ -138,7 +138,7 @@ class HomePage extends React.Component<Props, State> {
     if (navigationError) {
       return (
         <h1>
-Geolocation is not supported by your browser.
+          Geolocation is not supported by your browser.
         </h1>
       );
     }
@@ -164,12 +164,12 @@ Geolocation is not supported by your browser.
 
         {locationError && (
         <h1>
-Unable to retrieve your location.
+          Unable to retrieve your location.
         </h1>
         )}
         {loading ? (
           <h1>
-Finding Nearby Open Boba Stores...
+            Finding Nearby Open Boba Stores...
           </h1>
         ) : (
           <div>
