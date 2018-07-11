@@ -83,16 +83,31 @@ async function setup() {
 
   server.get('/shops', async (req, res) => {
     const { lat, long } = req.query;
-    let response = await fetch(
-      `https://api.yelp.com/v3/businesses/search?term=boba&latitude=${lat}&longitude=${long}&open_now=true`,
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.YELP_API_KEY}`
-        }
-      }
-    );
+    let response = await fetch('https://api.yelp.com/v3/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.YELP_API_KEY}`
+      },
+      body: JSON.stringify({
+        query: `{
+          search(term: "boba", open_now: true, latitude: ${lat}, longitude: ${long}) {
+            business {
+              id
+              display_phone
+              distance
+              name
+              photos
+              price
+              rating
+              url
+            }
+          }
+        }`
+      })
+    });
     response = await response.json();
-    return res.send(response.businesses);
+    return res.send(response.data.search.business);
   });
 
   // initial data, need to get all shop and user info

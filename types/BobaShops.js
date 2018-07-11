@@ -1,12 +1,12 @@
 // @flow
 
 declare type BobaShops = {
+  id: string,
   display_phone: string,
-  image_url: string,
-  url: string,
   distance: number,
+  name: string,
+  photos: Array<string>,
   price: string,
   rating: number,
-  name: string,
-  id: string
+  url: string
 };
