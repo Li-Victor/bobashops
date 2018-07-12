@@ -20,6 +20,11 @@ type State = {
   allShops: Array<ShopInfo>
 };
 
+function buttonMessage(locationError: boolean, nearbyStores: Array<BobaShops>): string {
+  if (locationError) return 'Retry';
+  return nearbyStores.length !== 0 ? 'Refresh Location' : 'Find Boba';
+}
+
 class HomePage extends React.Component<Props, State> {
   state = {
     loading: false,
@@ -143,23 +148,8 @@ class HomePage extends React.Component<Props, State> {
       );
     }
 
-    let buttonMessage;
-    if (locationError) {
-      buttonMessage = (
-        <button type="button" onClick={this.findBoba}>
-          Retry
-        </button>
-      );
-    } else {
-      buttonMessage = (
-        <button type="button" onClick={this.findBoba}>
-          {nearbyStores.length !== 0 ? 'Refresh Location' : 'Find Boba'}
-        </button>
-      );
-    }
-
     return (
-      <div>
+      <React.Fragment>
         <Header name="Bobashops" />
 
         {locationError && (
@@ -172,8 +162,10 @@ class HomePage extends React.Component<Props, State> {
             Finding Nearby Open Boba Stores...
           </h1>
         ) : (
-          <div>
-            {buttonMessage}
+          <React.Fragment>
+            <button type="button" onClick={this.findBoba}>
+              {buttonMessage(locationError, nearbyStores)}
+            </button>
             {nearbyStores.length !== 0 && (
               <List
                 nearbyStores={nearbyStores}
@@ -182,9 +174,9 @@ class HomePage extends React.Component<Props, State> {
                 buttonClick={this.buttonClick}
               />
             )}
-          </div>
+          </React.Fragment>
         )}
-      </div>
+      </React.Fragment>
     );
   }
 }
